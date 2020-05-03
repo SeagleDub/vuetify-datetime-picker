@@ -32,13 +32,15 @@
             </slot>
           </v-tab>
           <v-tab-item key="calendar">
-            <v-date-picker v-model="date" v-bind="datePickerProps" @input="showTimePicker" full-width></v-date-picker>
+            <v-date-picker v-model="date" v-bind="datePickerProps" :min="minDate" :max="maxDate" @input="showTimePicker" full-width></v-date-picker>
           </v-tab-item>
           <v-tab-item key="timer">
             <v-time-picker
               ref="timer"
               class="v-time-picker-custom"
               v-model="time"
+              :min="minTime"
+              :max="maxTime"
               v-bind="timePickerProps"
               full-width
             ></v-time-picker>
@@ -116,7 +118,15 @@ export default {
     },
     timePickerProps: {
       type: Object
-    }
+    },
+    datetimeMax: {
+      type: [Date],
+      default: null,
+    },
+    datetimeMin: {
+      type: [Date],
+      default: null,
+    },
   },
   data() {
     return {
@@ -130,6 +140,36 @@ export default {
     this.init()
   },
   computed: {
+    maxDate() {
+      return this.datetimeMax
+        ? this.datetimeMax.toISOString().substr(0, 10)
+        : null;
+    },
+    maxTime() {
+      if (!this.datetimeMax || !this.date) 
+        return null;
+      let eqDay =
+        new Date(this.date).toISOString().substr(0, 10) ==
+        this.datetimeMax.toISOString().substring(0, 10); 
+      return eqDay 
+        ? this.datetimeMax.toLocaleTimeString() 
+        : null;
+    },
+    minDate() {
+      return this.datetimeMin
+        ? this.datetimeMin.toISOString().substr(0, 10)
+        : null;
+    },
+    minTime() {
+      if (!this.datetimeMin || !this.date) 
+        return null;
+      let eqDay =
+        new Date(this.date).toISOString().substr(0, 10) ==
+        this.datetimeMin.toISOString().substring(0, 10); 
+      return eqDay 
+        ? this.datetimeMin.toLocaleTimeString() 
+        : null;
+    },
     dateTimeFormat() {
       return this.dateFormat + ' ' + this.timeFormat
     },
