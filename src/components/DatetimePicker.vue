@@ -256,7 +256,25 @@
         watch: {
             datetime: function () {
                 this.init()
+            },
+            date: function (val, oldVal) {
+                this.time = this.maxTime || this.minTime;
             }
         }
     }
 </script>
+
+<style scoped>
+    .v-picker.v-card{
+        box-shadow: none;
+        border-radius: 0;
+    }
+    .v-picker ::v-deep .v-time-picker-title__time .v-picker__title__btn,
+    .v-picker ::v-deep .v-time-picker-title__time span{
+        height: 56px;
+    }
+    .v-picker ::v-deep .v-time-picker-title__time{
+        margin: auto;
+    }
+</style>
+
