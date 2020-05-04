@@ -66,16 +66,14 @@
 </template>
 
 <script>
-    import {format, parse} from 'date-fns'
-
+    import { format, parse, formatISO } from 'date-fns'
     const DEFAULT_DATE = ''
-    const DEFAULT_TIME = '00:00:00'
+    const DEFAULT_TIME = ''
     const DEFAULT_DATE_FORMAT = 'yyyy-MM-dd'
     const DEFAULT_TIME_FORMAT = 'HH:mm:ss'
     const DEFAULT_DIALOG_WIDTH = 340
     const DEFAULT_CLEAR_TEXT = 'CLEAR'
     const DEFAULT_OK_TEXT = 'OK'
-
     export default {
         name: 'v-datetime-picker',
         model: {
@@ -107,7 +105,7 @@
             },
             timeFormat: {
                 type: String,
-                default: 'HH:mm'
+                default: DEFAULT_TIME_FORMAT
             },
             clearText: {
                 type: String,
@@ -147,55 +145,8 @@
             this.init()
         },
         computed: {
-            dtMax() {
-                if(!!this.datetimeMax) {
-                    return (this.datetimeMax instanceof Date) ? this.datetimeMax : new Date(this.datetimeMax);
-                }
-                return null;
-            },
-            dtMin() {
-                if(!!this.datetimeMin){
-                    return (this.datetimeMin instanceof Date) ? this.datetimeMin : new Date(this.datetimeMin);
-                }
-                return null;
-            },
-            maxDate() {
-                if (!!this.dtMax) {
-                    return this.dtMax.toISOString().substr(0, 10);
-                }
-                return null;
-            },
-            minDate() {
-                if (!!this.dtMin) {
-                    return this.dtMin.toISOString().substr(0, 10);
-                }
-                return null;
-            },
-            maxTime() {
-                if (!this.dtMax || !this.date)
-                    return null;
-                let eqDay =
-                    new Date(this.date).toISOString().substr(0, 10) ===
-                    this.dtMax.toISOString().substr(0, 10);
-                return eqDay
-                    ? this.dtMax.toLocaleTimeString()
-                    : null;
-            },
-            minTime() {
-                if (!this.dtMin || !this.date)
-                    return null;
-                let eqDay =
-                    new Date(this.date).toISOString().substr(0, 10) ===
-                    this.dtMin.toISOString().substr(0, 10);
-                return eqDay
-                    ? this.dtMin.toLocaleTimeString()
-                    : null;
-            },
             dateTimeFormat() {
                 return this.dateFormat + ' ' + this.timeFormat
-            },
-            defaultDateTimeFormat() {
-                return DEFAULT_DATE_FORMAT + ' ' + DEFAULT_TIME_FORMAT
             },
             formattedDatetime() {
                 return this.selectedDatetime ? format(this.selectedDatetime, this.dateTimeFormat) : ''
@@ -206,35 +157,69 @@
                     if (this.time.length === 5) {
                         datetimeString += ':00'
                     }
-                    return parse(datetimeString, this.defaultDateTimeFormat, new Date())
+                    return new Date(datetimeString)
                 } else {
                     return null
                 }
             },
             dateSelected() {
                 return !this.date
-            }
+            },
+            dtMax() {
+                if(!!this.datetimeMax) {
+                    return (this.datetimeMax instanceof Date) ? formatISO(this.datetimeMax) : new Date(this.datetimeMax).toISOString();
+                }
+                return null;
+            },
+            dtMin() {
+                if(!!this.datetimeMin){
+                    return (this.datetimeMin instanceof Date) ? formatISO(this.datetimeMin) : new Date(this.datetimeMin).toISOString();
+                }
+                return null;
+            },
+            maxDate() {
+                if (!!this.dtMax) {
+                    return this.dtMax.substr(0, 10);
+                }
+                return null;
+            },
+            minDate() {
+                if (!!this.dtMin) {
+                    return this.dtMin.substr(0, 10);
+                }
+                return null;
+            },
+            maxTime() {
+                if (!this.dtMax || !this.date) return null;
+                let eqDay = formatISO(new Date(this.date)).substr(0, 10) === this.maxDate;
+                return eqDay ? this.dtMax.substr(11, 8) : null;
+            },
+            minTime() {
+                if (!this.dtMin || !this.date) return null;
+                let eqDay = formatISO(new Date(this.date)).substr(0, 10) === this.minDate;
+                return eqDay ? this.dtMin.substr(11, 8) : null;
+            },
         },
         methods: {
             init() {
                 if (!this.datetime) {
+                    this.date = DEFAULT_DATE
+                    this.time = DEFAULT_TIME
                     return
                 }
-
                 let initDateTime
                 if (this.datetime instanceof Date) {
                     initDateTime = this.datetime
                 } else if (typeof this.datetime === 'string' || this.datetime instanceof String) {
                     // see https://stackoverflow.com/a/9436948
-                    initDateTime = parse(this.datetime, this.dateTimeFormat, new Date())
+                    initDateTime = new Date(this.datetime)
                 }
-
                 this.date = format(initDateTime, DEFAULT_DATE_FORMAT)
                 this.time = format(initDateTime, DEFAULT_TIME_FORMAT)
             },
             okHandler() {
                 this.resetPicker()
-                this.$emit('input', this.selectedDatetime)
+                this.$emit('input', formatISO(this.selectedDatetime))
             },
             clearHandler() {
                 this.resetPicker()
@@ -254,11 +239,11 @@
             }
         },
         watch: {
-            datetime: function () {
+            datetime: function() {
                 this.init()
             },
             date: function (val, oldVal) {
-                this.time = this.maxTime || this.minTime;
+                if(!this.dateSelected) this.time = this.minTime || this.maxTime;
             }
         }
     }
@@ -277,4 +262,3 @@
         margin: auto;
     }
 </style>
-
