@@ -155,7 +155,7 @@
                 return this.dateFormat + ' ' + this.timeFormat
             },
             formattedDatetime() {
-                return this.selectedDatetime ? format(this.selectedDatetime, this.dateTimeFormat) : ''
+                return this.selectedDatetime ? this.selectedDatetime.toISOString().replace('T', ' ').substr(0, 19) : ''
             },
             selectedDatetime() {
                 if (this.date && this.time) {
