@@ -213,7 +213,7 @@
             },
             okHandler() {
                 this.resetPicker()
-                this.$emit('input', this.selectedDatetime.toRealISOString().substr(0, 19))
+                //this.$emit('input', this.selectedDatetime.toRealISOString().substr(0, 19))
             },
             clearHandler() {
                 this.resetPicker()
@@ -246,6 +246,11 @@
             },
             date: function (val, oldVal) {
                 if(this.dateSelected && (this.minTime || this.maxTime)) this.time = this.minTime || this.maxTime;
+            },
+            selectedDatetime: function(val){
+                if(!!val){
+                    this.$emit('input', this.selectedDatetime.toRealISOString().substr(0, 19));
+                }
             }
         }
     }
